@@ -1,11 +1,11 @@
 import { Text, View, Image, FlatList, TouchableOpacity, ScrollView, StyleSheet, Button, TextInput, Alert } from "react-native";
 import { useGetRandPokemon } from "@/hooks/useGetRandPokemon";
-import { useGetRandTypes } from "@/hooks/useGetRandType";
-import { PokemonDto } from "@/dto/pokemonDto";
-import { GeneralTypeDto } from "@/dto/typeDto";
-import { useEffect, useState } from "react";
+import { useGetRandTypes } from "@/hooks/useGetRandType"; 
+import { useRouter } from "expo-router";
 
 export default function Index() {
+
+  const router = useRouter();
 
 
   const randPokemon = useGetRandPokemon(6);
@@ -25,33 +25,56 @@ export default function Index() {
   return (
     <ScrollView>
       <View style={styles.container}>
-        <Text style={styles.title}>Welcome to the Pokemon TCG</Text>
-        <View style={styles.cardContainer}>
-          {randPokemon.map((pokemon: PokemonDto) => (
-            <View key={pokemon.id} style={styles.card}>
+        <Text style={styles.title}>Bienvenue sur l'app Pokémon TCG</Text>
+        <TouchableOpacity style={styles.button} onPress={() => router.push(`/pokeList`)}>
+          <Text style={styles.buttonText}>Pour voir tout les pokémons</Text>
+        </TouchableOpacity>
+        <FlatList 
+        horizontal
+          data={randPokemon}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={styles.card} onPress={() => router.push(`/poke/id/${item.id}`)}>
               <Image
                 style={styles.image}
                 source={{
-                  uri: pokemon.image,
+                  uri: item.image,
                 }}
               />
-              <Text style={styles.text}>{pokemon.name}</Text>
-              <Text style={styles.text}>{pokemon.stats.HP} HP</Text>
-              <View>
-                {pokemon.apiTypes.map((type, index) => (
-                  <Text key={index} style={styles.text}>{type.name}</Text>
-                ))}
-              </View>
-            </View>
-          ))}
-        </View>
-        <View style={styles.cardContainer}>
-          {randTypes.map((type: GeneralTypeDto) => (
-            <View key={type.id} style={styles.card}>
-              <Text style={styles.text}>{type.name}</Text>
-            </View>
-          ))}
-        </View>
+              <Text style={styles.text}>{item.name}</Text>
+              <Text style={styles.text}>{item.stats.HP} HP</Text>
+              <FlatList
+                data={item.apiTypes}
+                keyExtractor={(type) => type.name}
+                renderItem={({ item: type }) => (
+                  <Text style={styles.text}>{type.name}</Text>
+                )}
+              />
+            </TouchableOpacity>
+          )}
+          contentContainerStyle={styles.cardContainer}
+          
+        />
+        <TouchableOpacity style={styles.button} onPress={() => router.push(`/typeList`)}>
+          <Text style={styles.buttonText}>Pour voir tout les types</Text>
+        </TouchableOpacity>
+        <FlatList
+        horizontal
+          data={randTypes}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={styles.card} onPress={() => router.push(`/poke/${item.name}`)}>
+              <Text style={styles.text}>{item.name}</Text>
+              <Image
+                style={styles.image}
+                source={{
+                  uri: item.image,
+                }}
+              />
+            </TouchableOpacity>
+          )}
+          contentContainerStyle={styles.cardContainer}
+        />
       </View>
     </ScrollView>
   );
@@ -60,9 +83,9 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fff",
   },
   title: {
     fontSize: 24,
@@ -70,15 +93,23 @@ const styles = StyleSheet.create({
     margin: 20,
   },
   cardContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    alignItems: "center",
     justifyContent: "center",
+  },
+  button: {
+    backgroundColor: "#f00",
+    padding: 10,
+    margin: 10,
+    borderRadius: 10,
+  },
+  buttonText: {
+    color: "#fff",
   },
   card: {
     margin: 10,
     padding: 10,
-    borderRadius: 10,
     backgroundColor: "#f00",
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -88,6 +119,6 @@ const styles = StyleSheet.create({
   },
   text: {
     color: "#fff",
-    fontWeight: "bold",
+    margin: 5,
   },
 });
